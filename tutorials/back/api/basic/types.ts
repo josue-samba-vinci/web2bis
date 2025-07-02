@@ -18,5 +18,6 @@ interface PizzaToUpdate {
 }
 
 type NewPizza = Omit<Pizza, "id">;
+type NewDrink = Omit<Drink, "id">;
 
-export type { Pizza, NewPizza, PizzaToUpdate, Drink };
+export type { Pizza, NewPizza, PizzaToUpdate, Drink, NewDrink };
