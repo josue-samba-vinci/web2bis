@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { Drink } from "../types";
+import { Drink, NewDrink } from "../types";
 
 const drinks: Drink[] = [
   {
@@ -58,7 +58,6 @@ router.get("/", (req, res) => {
   return res.json(filteredDrinks);
 });
 
-
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
   const drink = drinks.find((drink) => drink.id === id);
@@ -69,10 +68,27 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { title, image, volume, price } = req.body;
-  if (!title || !image || !volume || !price) {
+  const body: unknown = req.body;
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !("title" in body) ||
+    !("image" in body) ||
+    !("volume" in body) ||
+    !("price" in body) ||
+    typeof body.title !== "string" ||
+    typeof body.image !== "string" ||
+    typeof body.volume !== "number" ||
+    typeof body.price !== "number" ||
+    !body.title.trim() ||
+    !body.image.trim() ||
+    body.volume <= 0 ||
+    body.price <= 0
+  ) {
     return res.sendStatus(400);
   }
+
+  const { title, image, volume, price } = body as NewDrink;
 
   const nextId =
     drinks.reduce((maxId, drink) => (drink.id > maxId ? drink.id : maxId), 0) +
@@ -89,7 +105,5 @@ router.post("/", (req, res) => {
   drinks.push(newDrink);
   return res.json(newDrink);
 });
-
-
 
 export default router;
