@@ -12,4 +12,4 @@ type NewFilm = Omit<Film, "id">;
 
 //type NewPizza = Omit<Pizza, "id">;
 
-export type { Film, NewFilm};
+export type { Film, NewFilm };

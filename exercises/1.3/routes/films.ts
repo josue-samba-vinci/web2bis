@@ -37,19 +37,21 @@ const films: Film[] = [
 const router = Router();
 
 router.get("/", (_req, res) => {
-  if (!_req.query["minimum-duration"]){
+  if (!_req.query["minimum-duration"]) {
     return res.json(films);
   }
   const minimumDuration = Number(_req.query["minimum-duration"]);
-  const filteredFilms = films.filter((films)=>{
+  const filteredFilms = films.filter((films) => {
     return films.duration >= minimumDuration;
   });
   return res.json(filteredFilms);
 });
 
 router.post("/", (req, res) => {
-  const body : unknown = req.body;
-  if (!body || typeof body !== "object"||
+  const body: unknown = req.body;
+  if (
+    !body ||
+    typeof body !== "object" ||
     !("title" in body) ||
     !("director" in body) ||
     !("duration" in body) ||
@@ -59,36 +61,36 @@ router.post("/", (req, res) => {
     !body.title.trim() ||
     !body.director.trim() ||
     body.duration <= 0
-  ){
+  ) {
     return res.sendStatus(400);
-    }
-    const { title, director, duration, budget, description, imageUrl } = body as NewFilm;
+  }
+  const { title, director, duration, budget, description, imageUrl } =
+    body as NewFilm;
 
-    const nextId = films.reduce((maxId,films)=>(films.id>maxId ? films.id : maxId), 0) + 1;
-    const newFilm: Film = {
-      id: nextId,
-      title,
-      director,
-      duration,
-      budget,
-      description,
-      imageUrl
-    };
+  const nextId =
+    films.reduce((maxId, films) => (films.id > maxId ? films.id : maxId), 0) +
+    1;
+  const newFilm: Film = {
+    id: nextId,
+    title,
+    director,
+    duration,
+    budget,
+    description,
+    imageUrl,
+  };
 
-    films.push(newFilm);
-    return res.json(newFilm);
+  films.push(newFilm);
+  return res.json(newFilm);
 });
-
 
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
-  const film = films.find((film)=> film.id === id);
+  const film = films.find((film) => film.id === id);
   if (!film) {
     return res.sendStatus(404);
   }
   return res.json(film);
 });
-
-
 
 export default router;
