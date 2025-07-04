@@ -8,6 +8,8 @@ interface Film {
   imageUrl?: string;
 }
 
+type NewFilm = Omit<Film, "id">;
+
 //type NewPizza = Omit<Pizza, "id">;
 
-export type { Film};
+export type { Film, NewFilm};
