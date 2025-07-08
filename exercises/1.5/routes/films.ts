@@ -41,6 +41,11 @@ router.get("/", (_req, res) => {
     return res.json(films);
   }
   const minimumDuration = Number(_req.query["minimum-duration"]);
+  if (isNaN(minimumDuration) || minimumDuration <= 0) {
+      return res.status(400).json({
+        error: "Invalid minimum duration",
+      });
+    }
   const filteredFilms = films.filter((films) => {
     return films.duration >= minimumDuration;
   });
@@ -63,6 +68,13 @@ router.post("/", (req, res) => {
     body.duration <= 0
   ) {
     return res.sendStatus(400);
+  }
+  for (const film of films) {
+    if (film.title === body.title || film.director === body.director) {
+      return res.status(400).json({
+        error: "Film with this title already exists",
+      });
+    }
   }
   const { title, director, duration, budget, description, imageUrl } =
     body as NewFilm;
@@ -87,6 +99,11 @@ router.post("/", (req, res) => {
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
   const film = films.find((film) => film.id === id);
+  if (isNaN(id) || id <= 0 || id > films.length) {
+      return res.status(400).json({
+        error: "Invalid film ID",
+      });
+    }
   if (!film) {
     return res.sendStatus(404);
   }

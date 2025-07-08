@@ -1,12 +1,17 @@
 @baseUrl = http://localhost:3000
 
+
 ### Get all films
 GET {{baseUrl}}/films
 
-GET {{baseUrl}}/3
+
+### Get a film by ID
+GET {{baseUrl}}/films/4
+
 
 ### Get all films with a minimum duration of 120 minutes
 GET {{baseUrl}}/films?minimum-duration=120
+
 
 ### Add a new film
 ###The data I’m sending you is in JSON (JavaScript Object Notation) format
@@ -20,5 +25,3 @@ Content-Type: application/json
   "budget": 1000000,
   "imageUrl": "https://example.com/pastlives.jpg"
 }
-
-
