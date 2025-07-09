@@ -1,7 +1,10 @@
 import { Router } from "express";
+import path from "node:path";
 import { Drink, NewDrink } from "../types";
+import { parse, serialize } from "../utils/json";
+const jsonDbPath = path.join(__dirname, "/../data/drinks.json");
 
-const drinks: Drink[] = [
+const defaultDrinks: Drink[] = [
   {
     id: 1,
     title: "Coca-Cola",
@@ -47,6 +50,7 @@ const drinks: Drink[] = [
 const router = Router();
 
 router.get("/", (req, res) => {
+  const drinks = parse(jsonDbPath, defaultDrinks);
   if (!req.query["budget-max"]) {
     // Cannot call req.query.budget-max as "-" is an operator
     return res.json(drinks);
@@ -60,6 +64,7 @@ router.get("/", (req, res) => {
 
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const drinks = parse(jsonDbPath, defaultDrinks);
   const drink = drinks.find((drink) => drink.id === id);
   if (!drink) {
     return res.sendStatus(404);
@@ -89,6 +94,8 @@ router.post("/", (req, res) => {
   }
 
   const { title, image, volume, price } = body as NewDrink;
+  //to load the drinks array from a JSON file
+  const drinks = parse(jsonDbPath, defaultDrinks);
 
   const nextId =
     drinks.reduce((maxId, drink) => (drink.id > maxId ? drink.id : maxId), 0) +
@@ -103,21 +110,31 @@ router.post("/", (req, res) => {
   };
 
   drinks.push(newDrink);
+  // Serialize the updated drinks array back to the JSON file
+  // This will overwrite the existing file with the new data
+  serialize(jsonDbPath, drinks);
   return res.json(newDrink);
 });
 
 router.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
+  //to load the drinks array from a JSON file
+  //parse() reads the JSON file and returns the array of drinks.
+  //If the file does not exist or cannot be parsed, it uses the defaultDrinks
+  const drinks = parse(jsonDbPath, defaultDrinks);
   const index = drinks.findIndex((drink) => drink.id === id);
   if (index === -1) {
     return res.sendStatus(404);
   }
-  const deletedElements = drinks.splice(index, 1); // splice() returns an array of the deleted elements
+  const deletedElements = defaultDrinks.splice(index, 1); // splice() returns an array of the deleted elements
+  //Serializes (saves) the updated defaultDrinks array back to the JSON file.
+  serialize(jsonDbPath, drinks);
   return res.json(deletedElements[0]);
 });
 
 router.patch("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const drinks = parse(jsonDbPath, defaultDrinks);
   const drink = drinks.find((drink) => drink.id === id);
   if (!drink) {
     return res.sendStatus(404);
@@ -153,7 +170,7 @@ router.patch("/:id", (req, res) => {
   if (price) {
     drink.price = price;
   }
-
+  serialize(jsonDbPath, drinks);
   return res.json(drink);
 });
 
