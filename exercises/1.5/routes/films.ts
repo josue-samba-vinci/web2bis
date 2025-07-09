@@ -42,10 +42,10 @@ router.get("/", (_req, res) => {
   }
   const minimumDuration = Number(_req.query["minimum-duration"]);
   if (isNaN(minimumDuration) || minimumDuration <= 0) {
-      return res.status(400).json({
-        error: "Invalid minimum duration",
-      });
-    }
+    return res.status(400).json({
+      error: "Invalid minimum duration",
+    });
+  }
   const filteredFilms = films.filter((films) => {
     return films.duration >= minimumDuration;
   });
@@ -100,14 +100,127 @@ router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
   const film = films.find((film) => film.id === id);
   if (isNaN(id) || id <= 0 || id > films.length) {
-      return res.status(400).json({
-        error: "Invalid film ID",
-      });
-    }
+    return res.status(400).json({
+      error: "Invalid film ID",
+    });
+  }
   if (!film) {
     return res.sendStatus(404);
   }
   return res.json(film);
+});
+
+router.delete("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const filmIndex = films.findIndex((film) => film.id === id);
+  if (isNaN(id) || id <= 0 || id > films.length) {
+    return res.status(400).json({
+      error: "Invalid film ID",
+    });
+  }
+  if (filmIndex === -1) {
+    return res.sendStatus(404);
+  }
+  const deletedFilm = films.splice(filmIndex, 1);
+  return res.json(deletedFilm[0]);
+});
+
+router.patch("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const film = films.find((film) => film.id === id);
+  if (!film) {
+    return res.sendStatus(404);
+  }
+
+  const body: unknown = req.body;
+  if (
+    !body ||
+    typeof body !== "object" ||
+    ("title" in body &&
+      (typeof body.title !== "string" || !body.title.trim())) ||
+    ("director" in body &&
+      (typeof body.director !== "string" || !body.director.trim())) ||
+    ("duration" in body &&
+      (typeof body.duration !== "number" || body.duration <= 0)) ||
+    ("budget" in body && typeof body.budget !== "number") ||
+    ("description" in body && typeof body.description !== "string") ||
+    ("imageUrl" in body && typeof body.imageUrl !== "string")
+  ) {
+    return res.sendStatus(400);
+  }
+  const {
+    title,
+    director,
+    duration,
+    budget,
+    description,
+    imageUrl,
+  }: Partial<NewFilm> = body;
+
+  if (title) {
+    film.title = title;
+  }
+  if (director) {
+    film.director = director;
+  }
+  if (duration) {
+    film.duration = duration;
+  }
+  if (budget) {
+    film.budget = budget;
+  }
+  if (description) {
+    film.description = description;
+  }
+  if (imageUrl) {
+    film.imageUrl = imageUrl;
+  }
+  return res.json(film);
+});
+
+router.put("/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const filmIndex = films.findIndex((film) => film.id === id);
+  if (filmIndex === -1) {
+    return res.sendStatus(404);
+  }
+  const body: unknown = req.body;
+  if (
+    !body ||
+    typeof body !== "object" ||
+    !("title" in body) ||
+    !("director" in body) ||
+    !("duration" in body) ||
+    typeof body.title !== "string" ||
+    typeof body.director !== "string" ||
+    typeof body.duration !== "number" ||
+    //checks if, after trimming, the string is empty
+    !body.title.trim() ||
+    !body.director.trim() ||
+    body.duration <= 0
+  ) {
+    return res.sendStatus(400);
+  }
+  for (const film of films) {
+    if (film.title === body.title || film.director === body.director) {
+      return res.status(400).json({
+        error: "Film with this title or director already exists",
+      });
+    }
+  }
+  const { title, director, duration, budget, description, imageUrl } =
+    body as NewFilm;
+  const updatedFilm: Film = {
+    id,
+    title,
+    director,
+    duration,
+    budget,
+    description,
+    imageUrl,
+  };
+  films[filmIndex] = updatedFilm;
+  return res.json(updatedFilm);
 });
 
 export default router;
