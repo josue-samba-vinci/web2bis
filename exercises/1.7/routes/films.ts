@@ -1,7 +1,10 @@
 import { Router } from "express";
 import { Film, NewFilm } from "../types";
+import path from "node:path";
+import {parse, serialize } from "../utils/json";
+const jsonDbPath = path.join(__dirname, "/../db/films.json");
 
-const films: Film[] = [
+const defaultFilms: Film[] = [
   {
     id: 1,
     title: "Inception",
@@ -37,6 +40,7 @@ const films: Film[] = [
 const router = Router();
 
 router.get("/", (_req, res) => {
+  const films = parse (jsonDbPath, defaultFilms);
   if (!_req.query["minimum-duration"]) {
     return res.json(films);
   }
@@ -53,6 +57,7 @@ router.get("/", (_req, res) => {
 });
 
 router.post("/", (req, res) => {
+  const films = parse(jsonDbPath, defaultFilms);
   const body: unknown = req.body;
   if (
     !body ||
@@ -93,11 +98,13 @@ router.post("/", (req, res) => {
   };
 
   films.push(newFilm);
+  serialize(jsonDbPath, films);
   return res.json(newFilm);
 });
 
 router.get("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const films = parse(jsonDbPath, defaultFilms);
   const film = films.find((film) => film.id === id);
   if (isNaN(id) || id <= 0 || id > films.length) {
     return res.status(400).json({
@@ -112,6 +119,7 @@ router.get("/:id", (req, res) => {
 
 router.delete("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const films = parse(jsonDbPath, defaultFilms);
   const filmIndex = films.findIndex((film) => film.id === id);
   if (isNaN(id) || id <= 0 || id > films.length) {
     return res.status(400).json({
@@ -122,11 +130,13 @@ router.delete("/:id", (req, res) => {
     return res.sendStatus(404);
   }
   const deletedFilm = films.splice(filmIndex, 1);
+  serialize(jsonDbPath, films);
   return res.json(deletedFilm[0]);
 });
 
 router.patch("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const films = parse(jsonDbPath, defaultFilms);
   const film = films.find((film) => film.id === id);
   if (!film) {
     return res.sendStatus(404);
@@ -175,14 +185,52 @@ router.patch("/:id", (req, res) => {
   if (imageUrl) {
     film.imageUrl = imageUrl;
   }
+  serialize(jsonDbPath, films);
   return res.json(film);
 });
 
 router.put("/:id", (req, res) => {
   const id = Number(req.params.id);
+  const films = parse(jsonDbPath, defaultFilms);
   const filmIndex = films.findIndex((film) => film.id === id);
   if (filmIndex === -1) {
-    return res.sendStatus(404);
+    const body: unknown = req.body;
+    if (
+      !body ||
+      typeof body !== "object" ||
+      ("title" in body &&
+        (typeof body.title !== "string" || !body.title.trim())) ||
+      ("director" in body &&
+        (typeof body.director !== "string" || !body.director.trim())) ||
+      ("duration" in body &&
+        (typeof body.duration !== "number" || body.duration <= 0)) ||
+      ("budget" in body && typeof body.budget !== "number") ||
+      ("description" in body && typeof body.description !== "string") ||
+      ("imageUrl" in body && typeof body.imageUrl !== "string")
+    ) {
+      return res.sendStatus(400);
+    }
+    const {
+      title,
+      director,
+      duration,
+      budget,
+      description,
+      imageUrl,
+    }: Partial<NewFilm> = body;
+
+    const newFilm: Film = {
+      id,
+      title: title || "",
+      director: director || "",
+      duration: duration || 0,
+      budget: budget || 0,
+      description: description || "",
+      imageUrl: imageUrl || ""
+    };
+    films.push(newFilm);
+    serialize(jsonDbPath, films);
+    return res.status(201).json(newFilm); // 201 Created
   }
   const body: unknown = req.body;
   if (
@@ -220,6 +268,7 @@ router.put("/:id", (req, res) => {
     imageUrl,
   };
   films[filmIndex] = updatedFilm;
+  serialize(jsonDbPath, films);
   return res.json(updatedFilm);
 });
 

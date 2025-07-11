@@ -6,7 +6,7 @@ GET {{baseUrl}}/films
 
 
 ### Get a film by ID
-GET {{baseUrl}}/films/4
+GET {{baseUrl}}/films/2
 
 
 ### Get all films with a minimum duration of 120 minutes
@@ -19,8 +19,8 @@ POST {{baseUrl}}/films
 Content-Type: application/json
 
 {
-  "title": "Past Lives",
-  "director": "Celine Song",
+  "title": "ttt",
+  "director": "ttt",
   "duration": 105,
   "budget": 1000000,
   "imageUrl": "https://example.com/pastlives.jpg"
@@ -47,4 +47,12 @@ Content-Type: application/json
   "duration": 117,
   "budget": 3000000,
   "imageUrl": "https://example.com/thewhale.jpg"
+}
+
+### Update the pizza identified by 6
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json
+
+{
+    "title":"Inception"
 }
