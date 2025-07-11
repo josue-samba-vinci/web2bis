@@ -1,0 +1,58 @@
+@baseUrl = http://localhost:3000
+
+
+### Get all films
+GET {{baseUrl}}/films
+
+
+### Get a film by ID
+GET {{baseUrl}}/films/2
+
+
+### Get all films with a minimum duration of 120 minutes
+GET {{baseUrl}}/films?minimum-duration=120
+
+
+### Add a new film
+###The data I’m sending you is in JSON (JavaScript Object Notation) format
+POST {{baseUrl}}/films
+Content-Type: application/json
+
+{
+  "title": "ttt",
+  "director": "ttt",
+  "duration": 105,
+  "budget": 1000000,
+  "imageUrl": "https://example.com/pastlives.jpg"
+}
+
+### Delete a drink
+DELETE {{baseUrl}}/films/2
+
+### Update a parts of a film identified by ID
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json  
+
+{
+  "duration": 150
+}
+
+### Update or create a film identified
+PUT {{baseUrl}}/films/2
+Content-Type: application/json
+
+{
+  "title": "The Whale",
+  "director": "Darren Aronofsky",
+  "duration": 117,
+  "budget": 3000000,
+  "imageUrl": "https://example.com/thewhale.jpg"
+}
+
+### Update the pizza identified by 6
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json
+
+{
+    "title":"Inception"
+}
