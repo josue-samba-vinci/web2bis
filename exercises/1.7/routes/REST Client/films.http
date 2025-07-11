@@ -25,3 +25,26 @@ Content-Type: application/json
   "budget": 1000000,
   "imageUrl": "https://example.com/pastlives.jpg"
 }
+
+### Delete a drink
+DELETE {{baseUrl}}/films/2
+
+### Update a parts of a film identified by ID
+PATCH {{baseUrl}}/films/1
+Content-Type: application/json  
+
+{
+  "duration": 150
+}
+
+### Update or create a film identified
+PUT {{baseUrl}}/films/2
+Content-Type: application/json
+
+{
+  "title": "The Whale",
+  "director": "Darren Aronofsky",
+  "duration": 117,
+  "budget": 3000000,
+  "imageUrl": "https://example.com/thewhale.jpg"
+}
